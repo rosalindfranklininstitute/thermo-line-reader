@@ -1,40 +1,34 @@
 # SPDX-FileCopyrightText: 2026 RFI
 #
 # SPDX-License-Identifier: Apache-2.0
-import math
-from dataclasses import dataclass
-from enum import Enum
-import re
-import os
-from pathlib import Path
 import datetime as dt
 import logging
-
+import math
+import os
+import re
+from dataclasses import dataclass
+from enum import Enum
+from pathlib import Path
 from typing import Any, Callable, NamedTuple, override
+
 import numpy as np
-
-
-from xartus.lib.bounds import Shape, Chunk
-from xartus.lib.dtypes import Float1D32, Int1D32, Int3D32
 from xartus.lib import (
     AbstractDataSource,
-    DataShape,
     Axis,
-    AxisType,
+    Chunk,
+    DataShape,
+    MultiCOO,
+    MultiLinspace,
+    Shape,
     Signal,
 )
-from xartus.lib import (
-    MultiCOO,
-)
-
-from xartus.lib.multi_linspace import MultiLinspace
+from xartus.lib.dtypes import Float1D32, Int1D32, Int3D32
+from xartus.lib.writers import AbstractWriter, SumAndMax
 
 from .load_thermo import (
     RawFileReaderAdapter,
 )
-
 from .msi_instrument import MSInstrumentData
-
 
 logger = logging.getLogger(__name__)
 
@@ -229,7 +223,7 @@ class ThermoDataSource(AbstractDataSource):
         self.total_shape = (
             len(self.x_values),
             len(self.y_values),
-            len(self.mz_edges) - 1,
+            len(self.mz_edges),
         )
         logger.info(f" Image shape: {self.total_shape}.")
 
@@ -308,86 +302,65 @@ class ThermoDataSource(AbstractDataSource):
 
     @override
     def instrument_metadata(self) -> dict[str, Any]:
-        """
-        Returns a dictionary of values that will be stored as the instrument metadata.
-        """
         # TODO @DMD: what can we do here?
         # https://github.com/orgs/rosalindfranklininstitute/projects/19/views/1?pane=issue&itemId=213504413
         return {}
 
     @override
+    def user_metadata(self) -> dict[str, Any]:
+        return {}
+
+    @override
     def experiment_metadata(self) -> dict[str, Any]:
-        """
-        Returns a dictionary of values that will be stored as the experiment metadata.
-        """
         return self.experiment_data
 
     @override
     def shape(self) -> DataShape:
-        """
-        Return the shape of the data.
-        """
-        return DataShape(self.total_shape, is_sparse=True, worst_case_density=1.0)
+        return DataShape(self.total_shape, worst_case_density=1.0)
 
     @override
     def signal_definition(self) -> Signal:
-        """
-        Returns the type for data.
-        """
         return Signal("counts", np.int32, units="counts")
 
     @override
-    def output_chunks(self) -> dict[str, Shape]:
-        """
-        Returns the names and chunking priorities of the desired output array.
-        """
+    def output_chunk_priorities(self) -> dict[str, Shape]:
         return dict(images=(1, 1, 2), spectra=(2, 2, 1))
 
     @override
     def chunk_read_count(self, memory_chunk: Shape) -> int:
-        """
-        Returns the number of read operations needed to fill the provided memory chunk.
-        """
         return int(np.prod(memory_chunk[0:2]))
 
     @override
     def axis_definitions(self) -> list[Axis]:
-        """
-        Returns the axis that should be used when storing the data.
-        """
         return [
             Axis(
                 name="x",
                 primary_axis=0,
-                axis_type=AxisType.EXACT,
                 units="um",
                 dtype=np.float64,
             ),
             Axis(
                 name="time",
                 primary_axis=0,
-                axis_type=AxisType.EXACT,
                 units="s",
                 dtype=np.float64,
             ),
             Axis(
                 name="y",
                 primary_axis=1,
-                axis_type=AxisType.EXACT,
                 units="um",
                 dtype=np.float64,
             ),
             Axis(
                 name="mz",
                 primary_axis=2,
-                axis_type=AxisType.BINNED,
                 units="mz",
                 dtype=np.float64,
             ),
         ]
 
     @override
-    def exact_axis_values(self, axis: Axis) -> np.ndarray:
+    def axis_values(self, axis: Axis) -> np.ndarray:
         """
         Returns the values for the specified continuous axis.
         """
@@ -398,32 +371,17 @@ class ThermoDataSource(AbstractDataSource):
                 return self.x_values
             case "y":
                 return self.y_values
+            case "mz":
+                return self.mz_edges
             case _:
                 raise ValueError(f"Unknown continuous axis requested: {axis.name}")
 
     @override
-    def binned_axis_edges(self, axis: Axis) -> np.ndarray:
-        """
-        Returns the bin edges used to histogram the given sparse axis.
-        This is used for generating the output accumulations acros this axis, if required.
-        """
-        match axis.name:
-            case "mz":
-                return self.mz_edges
-            case _:
-                raise ValueError(f"Unknown sparse axis requested: {axis.name}")
-
-    @override
-    def output_accumulations(self) -> dict[str, tuple[str, ...]]:
-        """
-        Returns the names and lists of axis that should be
-        accumulated (summed and max).
-        For example simple image data (x,y, spectra):
-        might produce:
-        'total_images':     ('mz') # Accumulate over the spectra
-        'total_spectra':    ('x','y') # Accumulate over the images
-        """
-        return dict(total_image=("mz",), total_spectra=("x", "y"))
+    def output_accumulations(self) -> list[AbstractWriter]:
+        return [
+            SumAndMax("total_image", axes=["mz"]),
+            SumAndMax("total_spectra", axes=["x", "y"]),
+        ]
 
     @override
     def fill_chunk(
@@ -431,25 +389,6 @@ class ThermoDataSource(AbstractDataSource):
         memory_chunk: Chunk,
         update: Callable[[int], None],
     ) -> np.ndarray | MultiCOO:
-        """
-        Read data from the source in the region specified by
-        memory_chunk and return that data. Also return the data
-        any sparse axis.
-
-        Parameters:
-        memory_chunk:   The bounds of the data to read.
-        fill_axis:      The list of sparse axis to fill.
-        update:         A callback to update progress.
-                        The total of the progress counter is
-                        sum([chunk_read_count(mc) for mc in all_memory_chunks])
-        Returns:
-        The data from the source, and the data for all the sparse axes, ordered in the same order as in the fill_axis.
-        If dense :
-        -> return_data.shape == self.shape()
-        If sparse there is an extra dimension for storing signal and each sparse axis:
-        -> return_data.shape[0:-1] == self.shape() and return_data.shape[-1] = len(fill_axis)+1
-
-        """
         min_time = self.time_values[memory_chunk[0].start]
         max_time = self.time_values[memory_chunk[0].stop - 1]
 

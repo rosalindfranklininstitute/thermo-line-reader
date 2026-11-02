@@ -13,11 +13,11 @@ authors = [
 requires-python = ">=3.13,<3.14"
 dependencies = [
     "colorama>=0.4.6",
-    "argsui",
     "h5py>=3.16.0",
     "icecream>=2.1.10",
-    "xartus",
     "pythonnet>=3.0.5",
+    "xartus>=0.5.1",
+    "argsui[gui]>=0.3.6",
     "pyimzml",
 ]
 license = "Apache-2.0 AND LicenseRef-RawFileReader-reading-tool"
@@ -53,11 +53,6 @@ ignore=["C408", "S311", "PTH123", "NPY002", "D203", "D205", "D212", "B006", "ARG
 [tool.ruff.lint.per-file-ignores]
 "src/thermo_reader/load_thermo.py" = ["E402", "N802"]
 
-[tool.uv.sources]
-xartus = { path = "../xartus", editable = true }
-argsui = { path = "../argsUI", editable = true }
-pyimzml = { path = "../pyimzML", editable = true }
-
 [tool.bumpversion]
 current_version = "0.3.1"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
@@ -91,3 +86,6 @@ extend-exclude = [
     "*/thermo_reader/dlls*",
     "*.spec"
     ]
+
+[tool.uv.sources]
+pyimzml = { git = "https://github.com/rosalindfranklininstitute/pyimzML.git" }
