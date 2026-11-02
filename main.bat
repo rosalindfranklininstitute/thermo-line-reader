@@ -1,6 +1,6 @@
-rem SPDX-FileCopyrightText: 2026 RFI
-rem
-rem SPDX-License-Identifier: Apache-2.0
+REM SPDX-FileCopyrightText: 2026 Duncan McDougall <duncan.mcdougall@rfi.ac.uk>
+REM
+REM SPDX-License-Identifier: LicenseRef-RFI-Apache-2.0-Commons-clause
 
 set FILE=main
 del %FILE%.py.lprof
