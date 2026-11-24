@@ -3,18 +3,15 @@
 # SPDX-License-Identifier: LicenseRef-RFI-Apache-2.0-Commons-clause
 
 [project]
-name = "thermo-reader"
+name = "thermo-line-reader"
 version = "0.4.0"
-description = "A tool for reading thermo Raw files and converting them to varius formats."
+description = "A tool for reading Thermo .raw files as lines and converting them to MSI images."
 readme = "README.md"
 authors = [
     { name = "Duncan McDougall", email = "duncan.mcdougall@rfi.ac.uk" }
 ]
-requires-python = ">=3.13,<3.14"
+requires-python = ">=3.13"
 dependencies = [
-    "colorama>=0.4.6",
-    "h5py>=3.16.0",
-    "icecream>=2.1.10",
     "pythonnet>=3.0.5",
     "xartus>=0.5.1",
     "argsui[gui]>=0.3.6",
@@ -24,7 +21,7 @@ license = "LicenseRef-RFI-Apache-2.0-Commons-clause AND LicenseRef-RawFileReader
 license-files = ["LICENSES/*"]
 
 [project.scripts]
-main = "thermo_reader:source"
+main = "thermo_line_reader:source"
 
 [build-system]
 requires = ["uv_build>=0.10.0,<0.11.0"]
@@ -34,7 +31,7 @@ build-backend = "uv_build"
 line-by-line = true
 verbose = false
 skip-zero = true
-prof-mod = ['./src/thermo_reader/', 'thermo_reader', '../ms-nexus-tools/src/ms_nexus_tools/', 'ms_nexus_tools']
+prof-mod = ['./src/thermo_line_reader/', 'thermo_line_reader', 'xartus']
 prof-imports = false
 
 [dependency-groups]
@@ -83,7 +80,7 @@ DNE = 'DNE'
 
 [tool.typos.files]
 extend-exclude = [
-    "*/thermo_reader/dlls*",
+    "*/thermo_line_reader/dlls*",
     "*.spec"
     ]
 

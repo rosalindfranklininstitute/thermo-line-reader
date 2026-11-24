@@ -6,7 +6,7 @@
 
 from PyInstaller.utils.hooks import collect_all
 
-datas = [('src\\thermo_reader\\dlls', 'thermo_reader\\dlls')]
+datas = [('src\\thermo_line_reader\\dlls', 'thermo_line_reader\\dlls')]
 binaries = []
 hiddenimports = []
 tmp_ret = collect_all('xartus')
@@ -41,7 +41,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='thermo_reader',
+    name='thermo_line_reader',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -60,5 +60,5 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='thermo_reader',
+    name='thermo_line_reader',
 )
