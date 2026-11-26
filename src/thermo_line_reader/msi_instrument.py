@@ -88,11 +88,11 @@ class MSInstrumentData:
 
     def metadata(self) -> dict[str, Any]:
         return {
-            "model": self._data.Model,
-            "name": self._data.Name,
-            "serial_number": self._data.SerialNumber,
-            "Software version:": self._data.SoftwareVersion,
-            "Firmware version:": self._data.HardwareVersion,
-            "Units:": self._data.Units,
-            "Mass resolution:": self.raw_file.RunHeaderEx.MassResolution,
+            "model": str(self._data.Model),
+            "name": str(self._data.Name),
+            "serial_number": str(self._data.SerialNumber),
+            "Software version:": str(self._data.SoftwareVersion),
+            "Firmware version:": str(self._data.HardwareVersion),
+            "Units:": str(self._data.Units),
+            "Mass resolution:": str(self.raw_file.RunHeaderEx.MassResolution),
         }

@@ -21,7 +21,7 @@ license = "LicenseRef-RFI-Apache-2.0-Commons-clause AND LicenseRef-RawFileReader
 license-files = ["LICENSES/*"]
 
 [project.scripts]
-main = "thermo_line_reader:source"
+main = "thermo_line_reader:main"
 
 [build-system]
 requires = ["uv_build>=0.10.0,<0.11.0"]
@@ -40,6 +40,20 @@ dev = [
     "line-profiler>=5.0.1",
     "icecream>=2.1.10",
     "pre-commit>=4.7.0",
+    "pytest>=9.2.0",
+    "pytest-cov>=7.1.0",
+    "pytest-autoprofile>=0.21.0",
+]
+
+[tool.pytest]
+testpaths = ["./tests", "./src/"]
+addopts = [
+    "--doctest-modules", 
+    "--cov=./src/", 
+    "--cov-report=html", 
+    "--cov-branch",
+    "--recursive-autoprof=thermo_line_reader",
+    "--autoprof-tests",
 ]
 
 [tool.ruff.lint]
@@ -49,6 +63,8 @@ ignore=["C408", "S311", "PTH123", "NPY002", "D203", "D205", "D212", "B006", "ARG
 
 [tool.ruff.lint.per-file-ignores]
 "src/thermo_reader/load_thermo.py" = ["E402", "N802"]
+"__init__.py" = ["F401"]
+"tests/**/*" = ["ANN", "S101"]
 
 [tool.bumpversion]
 current_version = "0.4.0"

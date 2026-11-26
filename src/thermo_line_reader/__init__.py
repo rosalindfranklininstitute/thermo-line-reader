@@ -4,7 +4,7 @@
 
 import logging
 
-from typing import cast
+from typing import cast, Any
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,7 +14,11 @@ from xartus.lib.multi_linspace import MultiLinspace
 from xartus.lib import unidec, image, utils
 from xartus.api import data_convert
 
-from .data_source import ThermoDataSource
+from .data_source import (
+    ThermoDataSource,
+    PixelMetric as PixelMetric,
+    TimeBounds as TimeBounds,
+)
 from .process_args import ProcessArgs
 from .imzml_writer import write_imzml
 
@@ -23,13 +27,19 @@ logging.basicConfig(format="%(module)s: %(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 
-def source() -> None:
+def main() -> None:
     logger.setLevel(logging.INFO)
     logging.getLogger(data_convert.__name__).setLevel(logging.INFO)
     partial_args = ProcessArgs.parse_config("thermo")
     process_args = ProcessArgs.parse_interactive(
         "thermo", args=partial_args.remaining_args, exclude=["config"]
     )
+
+    process_args = parse_args(process_args)
+    process(process_args, partial_args.config)
+
+
+def parse_args(process_args: ProcessArgs) -> ProcessArgs:
     sampling = MultiLinspace(
         downsample_count=process_args.down_sampling,
         area_positions=np.array([100]),
@@ -45,6 +55,10 @@ def source() -> None:
         micron_per_line=process_args.micron_per_line,
         sampling=sampling,
     )
+    return process_args
+
+
+def process(process_args: ProcessArgs, config: dict[str, Any] = {}) -> None:
 
     with utils.FileGuard(
         process_args.out_path,
@@ -53,7 +67,7 @@ def source() -> None:
         if not process_args.dry_run
         else utils.FileAction.DO_NOTHING,
     ):
-        data_convert.process(process_args, partial_args.config)
+        data_convert.process(process_args, config)
 
     if process_args.dry_run:
         return

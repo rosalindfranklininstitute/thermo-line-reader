@@ -4,6 +4,6 @@ REM SPDX-License-Identifier: LicenseRef-RFI-Apache-2.0-Commons-clause
 
 set FILE=main
 del %FILE%.py.lprof
-uv run kernprof %FILE%.py -- --interactive -c config.toml
+uv run kernprof %FILE%.py -- --interactive 
 uv run python -m line_profiler -rmzt %FILE%.py.lprof > %FILE%.py.lines
 echo Done. Read results in %FILE%.py.lines

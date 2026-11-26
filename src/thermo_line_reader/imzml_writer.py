@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: LicenseRef-RFI-Apache-2.0-Commons-clause
 
+from typing import cast
 from pathlib import Path
 import itertools
 
@@ -64,7 +65,7 @@ def write_imzml(
 
                 intensity = da.isel(**select)
                 assert intensity.shape == da.coords["mz"].shape
-                np_int = intensity.as_numpy().data
+                np_int = cast(np.ndarray, intensity.values)
                 inx = np_int.nonzero()[0]
                 if len(inx) == 0:
                     continue

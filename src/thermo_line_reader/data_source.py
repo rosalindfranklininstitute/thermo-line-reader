@@ -197,11 +197,16 @@ class ThermoDataSource(AbstractDataSource):
             + 1
         )
         self.time_values = np.array(
-            [ii * delta_t + self.data_lines.times.min for ii in range(time_count)]
+            [ii * delta_t + self.data_lines.times.min for ii in range(time_count)],
+            dtype=np.dtype(np.float32),
         )
-        self.x_values = np.array([ii * delta_m for ii in range(time_count)])
+        self.x_values = np.array(
+            [ii * delta_m for ii in range(time_count)],
+            dtype=np.dtype(np.float32),
+        )
         self.y_values = np.array(
-            [ii * micron_per_line for ii in range(len(self.data_lines.lines))]
+            [ii * micron_per_line for ii in range(len(self.data_lines.lines))],
+            dtype=np.dtype(np.float32),
         )
         logger.info(" Lines:")
         logger.info(f"      : Count: {len(self.data_lines.lines)}")
@@ -342,25 +347,25 @@ class ThermoDataSource(AbstractDataSource):
                 name="x",
                 primary_axis=0,
                 units="um",
-                dtype=np.float64,
+                dtype=self.x_values.dtype,
             ),
             Axis(
                 name="time",
                 primary_axis=0,
                 units="s",
-                dtype=np.float64,
+                dtype=self.time_values.dtype,
             ),
             Axis(
                 name="y",
                 primary_axis=1,
                 units="um",
-                dtype=np.float64,
+                dtype=self.y_values.dtype,
             ),
             Axis(
                 name="mz",
                 primary_axis=2,
                 units="mz",
-                dtype=np.float64,
+                dtype=self.mz_edges.dtype,
             ),
         ]
 
@@ -370,10 +375,10 @@ class ThermoDataSource(AbstractDataSource):
         Returns the values for the specified continuous axis.
         """
         match axis.name:
-            case "time":
-                return self.time_values
             case "x":
                 return self.x_values
+            case "time":
+                return self.time_values
             case "y":
                 return self.y_values
             case "mz":
