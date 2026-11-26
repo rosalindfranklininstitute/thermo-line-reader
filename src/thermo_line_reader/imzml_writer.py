@@ -15,11 +15,13 @@ from pyimzml.ImzMLWriter import ImzMLWriter
 from pyimzml.compression import NoCompression
 
 
-def write_imzml(nx_path: Path, out_path: Path, one_indexed=True) -> None:
+def write_imzml(
+    nx_path: Path, out_path: Path, one_indexed=True, entry_path="/entry/data/spectra"
+) -> None:
     with utils.DeferredAction() as defer:
         data = xr.open_datatree(nx_path, engine="nexus")
         defer(data.close)
-        da = data["/entry/data/spectra"]
+        da = data[entry_path]
 
         shape = da.shape
 

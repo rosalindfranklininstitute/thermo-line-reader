@@ -148,6 +148,10 @@ class DataLines(NamedTuple):
         raw_file = RawFileReaderAdapter.FileFactory(str(self.lines[line_index].file))
         return MSInstrumentData(raw_file, instrument_index), self.scan_times[line_index]
 
+    def instrument_metadata(self, line_index, instrument_index) -> dict[str, Any]:
+        raw_file = RawFileReaderAdapter.FileFactory(str(self.lines[line_index].file))
+        return MSInstrumentData(raw_file, instrument_index).metadata()
+
 
 class ThermoDataSource(AbstractDataSource):
     def __init__(
@@ -305,7 +309,7 @@ class ThermoDataSource(AbstractDataSource):
     def instrument_metadata(self) -> dict[str, Any]:
         # TODO @DMD: what can we do here?
         # https://github.com/orgs/rosalindfranklininstitute/projects/19/views/1?pane=issue&itemId=213504413
-        return {}
+        return self.data_lines.instrument_metadata(0, 1)
 
     @override
     def user_metadata(self) -> dict[str, Any]:

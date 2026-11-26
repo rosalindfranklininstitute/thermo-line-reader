@@ -81,7 +81,8 @@ DNE = 'DNE'
 [tool.typos.files]
 extend-exclude = [
     "*/thermo_line_reader/dlls*",
-    "*.spec"
+    "*.spec",
+    "one_off_data_conversions.py",
     ]
 
 [tool.uv.sources]

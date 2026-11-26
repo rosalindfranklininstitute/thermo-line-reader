@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: LicenseRef-RFI-Apache-2.0-Commons-clause
 
+# ruff: noqa N802 Disables: "Function name should be lowercase"
+
 from pythonnet import load
 from pathlib import Path
 
