@@ -30,9 +30,9 @@ logger = logging.getLogger(__name__)
 def main() -> None:
     logger.setLevel(logging.INFO)
     logging.getLogger(data_convert.__name__).setLevel(logging.INFO)
-    partial_args = ProcessArgs.parse_config("thermo")
+    partial_args = ProcessArgs.parse_config("thermo_line_reader")
     process_args = ProcessArgs.parse_interactive(
-        "thermo", args=partial_args.remaining_args, exclude=["config"]
+        "thermo_line_reader", args=partial_args.remaining_args, exclude=["config"]
     )
 
     process_args = parse_args(process_args)
