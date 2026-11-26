@@ -39,7 +39,7 @@ this wither using a pixel width in time or in space. As shown below.
 ### Using distance
 
 The $x$ distance is specified as distance $200\mu m$. This will use the line
-speed ($20 \sfrac{\mu m}{s}$) to determine how to bin the input files. It can be
+speed ($20 \mu m/s$) to determine how to bin the input files. It can be
 done using only the command line with:
 
 ```bash
@@ -68,7 +68,7 @@ pixel-metric='distance'
 
 The $x$ distance is specified as $10s$. It can be done using only the command line with:
 The $x$ distance is specified as time with $10s$. This will bin the input, and use the line
-speed ($20 \sfrac{\mu m}{s}$) convert this to distance. It can be done using only the command line with:
+speed ($20 \mu m/s$) convert this to distance. It can be done using only the command line with:
 
 ```bash
 thermo_line_reader --input '/input/data/' --output '/output/data.nxs' --micron-per-line 200 --micron-per-second 20 --pixel-width 10 --pixel-metric 'time'
